@@ -1,6 +1,7 @@
 let currentOperation = null;
 let operand = '';
 let secondOperand = '';
+let refreshScreen = false;
 
 const clearBtn = document.getElementById('clear');
 const deleteBtn = document.getElementById('delete');
@@ -36,7 +37,7 @@ numberBtns.forEach(button => {
 })
 
 function getNumber(num) {
-  if(screen.textContent === '0') {
+  if(screen.textContent === '0' || refreshScreen) {
     refresh();
   };
   screen.textContent += num;
@@ -47,14 +48,14 @@ opButtons.forEach(button => {
 })
 
 function getOperator(op) {
-  if (currentOperation !== null) {
-    solve();
-  };
+  if (currentOperation !== null) solve();
   operand = screen.textContent;
   currentOperation = op;
+  refreshScreen = true;
 };
 
 function solve() {
+  if (currentOperation === null || refreshScreen) return;
   if (currentOperation === '÷' && screen.textContent === '0') {
     alert("It's impossible to divide by 0")
     return
@@ -62,6 +63,8 @@ function solve() {
   secondOperand = screen.textContent;
   screen.textContent = roundToTenth(
     operate(currentOperation, operand, secondOperand));
+  currentOperation = null;
+  
 };
 
 
@@ -69,32 +72,26 @@ function solve() {
 
 function keyOperator(key) {
   if(key === '/') return '÷';
-  if(key === 'x' || '*') return 'x';
+  if(key === '*') return 'x';
   if(key === '-') return '-';
   if(key === '+') return '+';
 }
 
 function keyInput(e) {
-  if(e.key >= 0 && e.key <= 9) {
-    getNumber(e.key)
-  } else if (e.key === '-' || '+' || '/' || '*') {
+  if (e.key >= 0 && e.key <= 9) getNumber(e.key)
+  if (e.key === '-' || e.key === '+' || e.key === '/' || e.key === '*') {
     getOperator(keyOperator(e.key));
-  } else if (e.key === '=' || e.key === 'Enter') {
-    solve();
-  } else if (e.key === 'Backspace') {
-    del();
-  } else if (e.key === '.') {
-    getDecimal();
   };
+  if (e.key === '=') solve();
+  if (e.key === 'Backspace') del();
+  if (e.key === '.') getDecimal();
 };
 
 function getDecimal() {
-  if (screen.textContent === '') {
-    screen.textContent = '0';
-  }else if (screen.textContent.includes('.')){
-    return
-  };
+  if (screen.textContent === '') screen.textContent = '0';
+  if (screen.textContent.includes('.')) return
   screen.textContent += '.';
+  if (refreshScreen) refresh();
 }
 
 // Operator functions
@@ -118,7 +115,7 @@ function division(a, b) {
 function operate(operator, a, b) {
   a = Number(a);
   b = Number(b);
-  switch(symbol) {
+  switch(operator) {
     case '+':
       return add(a, b);
     case '-':
@@ -140,6 +137,7 @@ function operate(operator, a, b) {
 
 function refresh() {
   screen.textContent = '';
+  refreshScreen = false;
 }
 
 function roundToTenth(num) {
