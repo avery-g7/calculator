@@ -56,7 +56,7 @@ function getOperator(op) {
 
 function solve() {
   if (currentOperation === null || refreshScreen) return;
-  if (currentOperation === '÷' && screen.textContent === '0') {
+  if (currentOperation === '÷' || '/' && screen.textContent === '0') {
     alert("It's impossible to divide by 0")
     return
   }
